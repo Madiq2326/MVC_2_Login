@@ -27,6 +27,8 @@ namespace MVC_2.Models
 
         public DbSet<User> Users { get; set; }
 
+        public DbSet<Role> Roles { get; set; }
+
         public static ApplicationDbContext Create()
         {
             return new ApplicationDbContext();

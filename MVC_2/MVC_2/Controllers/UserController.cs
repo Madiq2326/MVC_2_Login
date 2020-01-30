@@ -11,6 +11,8 @@ using System.Data.SqlClient;
 using System.Configuration;
 using System.Net.Mail;
 using System.Net;
+using System.Threading.Tasks;
+using System.Data.Entity;
 
 namespace MVC_2.Controllers
 {
@@ -19,9 +21,9 @@ namespace MVC_2.Controllers
 
         ApplicationDbContext myContext = new ApplicationDbContext();
         // GET: User
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            var check = myContext.Users.ToList() ;
+            var check = await myContext.Users.ToListAsync();
             return View(check);
         }
 
@@ -31,44 +33,54 @@ namespace MVC_2.Controllers
         }
 
         [HttpPost]
-        public ActionResult Login(User user)
+        public async Task<ActionResult> Login(User user)
+
         {
-            var check = myContext.Users.FirstOrDefault(a => a.Email.Equals(user.Email));
-
-            bool what = class_hash.ValidatePassword(user.Password, check.Password);
-
-            if(check != null && what == true)
+            try
             {
-                 return RedirectToAction("Index");
+                var check = await myContext.Users.FirstOrDefaultAsync(a => a.Username.Equals(user.Username));
+
+                bool what = class_hash.ValidatePassword(user.Password, check.Password);
+
+                if (check != null && what == true)
+                {
+                    return RedirectToAction("Index");
+                }
+
+                else
+                {
+                    return RedirectToAction("Login");
+                }
             }
 
-            else
+            catch (Exception ex)
             {
-                 return RedirectToAction("Login");
+                return View("Error_404");
             }
         }
 
-        public ActionResult Edit(int id)
+        public async Task<ActionResult> Edit(int id)
         {
-            var edit = myContext.Users.Find(id);
+            var edit = await myContext.Users.FindAsync(id);
 
             return View();
         }
 
         [HttpPost]
-        public ActionResult Edit(int id, User user)
+        public async Task<ActionResult> Edit(int id, User user)
         {
             try
             {
-                var check = myContext.Users.Find(id);
+                var check = await myContext.Users.FindAsync(id);
 
                 check.Password = user.Password;
 
                 return RedirectToAction("Index");
             }
-            catch
+
+            catch (Exception ex)
             {
-                return View();
+                return View("Error_404");
             }
         }
 
@@ -86,7 +98,7 @@ namespace MVC_2.Controllers
 
         // POST: User/Create
         [HttpPost]
-        public ActionResult Create(User user)
+        public async Task<ActionResult> Create(User user)
         {
             try
             {
@@ -94,56 +106,82 @@ namespace MVC_2.Controllers
 
                 user.Password = class_hash.HashPassword(user.Password);
 
-                // TODO: Add insert logic here
-
                 myContext.Users.Add(user);
 
-                myContext.SaveChanges();
+                var role = await myContext.Roles.FirstOrDefaultAsync(a => a.Id == 2);
 
-                MailMessage mm = new MailMessage("Madiq2326@gmail.com", user.Email);
-                mm.Subject = "Madiq Group";
-                mm.Body = "Hi " + user.Username + " thanks for registering to our new application \n This Is Your New Password : " + ori_Password;
+                user.Role_id = role;
 
-                SmtpClient smtp = new SmtpClient();
-                smtp.Host = "smtp.gmail.com";
-                smtp.Port = 587;
-                smtp.EnableSsl = true;
+                var result = await myContext.SaveChangesAsync();
 
-                smtp.UseDefaultCredentials = false;
-                smtp.Credentials = new NetworkCredential("Madiq2326@gmail.com", "Mind2326");
-                smtp.Send(mm);
+                if(result > 0)
+                {
+                    MailMessage mm = new MailMessage("Madiq2326@gmail.com", user.Email);
+                    mm.Subject = "Madiq Group";
+                    mm.Body = "Hi " + user.Username + " thanks for registering to our new application \n This Is Your New Password : " + ori_Password + "\n And your hash password is " + user.Password;
 
-                return RedirectToAction("Login");
+                    SmtpClient smtp = new SmtpClient();
+                    smtp.Host = "smtp.gmail.com";
+                    smtp.Port = 587;
+                    smtp.EnableSsl = true;
+
+                    smtp.UseDefaultCredentials = false;
+                    smtp.Credentials = new NetworkCredential("Madiq2326@gmail.com", "Mind2326");
+                    smtp.Send(mm);
+
+                    return RedirectToAction("Login");
+                }
+
+                else
+                {
+                   return RedirectToAction("Create");
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                return View("Error_404");
             }
         }
 
-        public ActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            var delete = myContext.Users.Find(id);
+            var delete = await myContext.Users.FindAsync(id);
             return View();
         }
 
         // POST: Roles/Delete/5
         [HttpPost]
-        public ActionResult Delete(int id, User user)
+        public async Task<ActionResult> Delete(int id, User user)
         {
             try
             {
-                var delete = myContext.Users.Find(id);
+                var delete = await myContext.Users.FindAsync(id);
                 myContext.Users.Remove(delete);
                 myContext.SaveChanges();
                 // TODO: Add delete logic here
 
                 return RedirectToAction("Login");
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                return View("Error_404");
             }
+        }
+
+        public ActionResult Error_404()
+        {
+            return View();
+        }
+
+        public ActionResult test()
+        {
+            return View();
+        }
+
+        public async Task<ActionResult> tables()
+        {
+            var check = await myContext.Users.ToListAsync();
+            return View(check);
         }
     }
 }

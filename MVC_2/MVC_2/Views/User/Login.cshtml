@@ -14,13 +14,15 @@
                 @Html.AntiForgeryToken()
                 <hr />
                 @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
                 <div class="form-group">
-                    @Html.LabelFor(Model => Model.Email, new { @class = "col-md-2 control-label" })
+                    @Html.LabelFor(Model => Model.Username, new { @class = "col-md-2 control-label" })
                     <div class="col-md-10">
-                        @Html.TextBoxFor(Model => Model.Email, new { @class = "form-control" })
-                        @Html.ValidationMessageFor(Model => Model.Email, "", new { @class = "text-danger" })
+                        @Html.TextBoxFor(Model => Model.Username, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(Model => Model.Username, "", new { @class = "text-danger" })
                     </div>
                 </div>
+
                 <div class="form-group">
                     @Html.LabelFor(Model => Model.Password, new { @class = "col-md-2 control-label" })
                     <div class="col-md-10">
@@ -28,9 +30,10 @@
                         @Html.ValidationMessageFor(Model => Model.Password, "", new { @class = "text-danger" })
                     </div>
                 </div>
+
                 <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
-                        <input onclick="Click_Login" type="submit" value="Login" class="btn btn-default" />
+                        <input type="submit" value="Login" class="btn btn-default" />
                     </div>
                 </div>
                 <p>

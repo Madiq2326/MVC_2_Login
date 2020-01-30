@@ -13,6 +13,7 @@ namespace MVC_2.Models
         public String Username { get; set; }
         public String Email { get; set; }
         public String Password { get; set; }
+        public Role Role_id { get; set; }
     }
 
     public class take
